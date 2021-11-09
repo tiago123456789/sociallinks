@@ -2,6 +2,13 @@ import React from "react"
 import prismic from "prismic-javascript"
 
 const Index = (props) => {
+    if (!props.prismic) {
+        return (
+            <>
+                <p className="w-screen h-screen w-1/2 mx-auto text-center my-5">Não foi encontrado!!!</p>
+            </>
+        );
+    }
     return (
         <div className="w-screen h-screen" style={{ background: props.prismic.background_color }}>
             <div className="w-1/2 mx-auto text-center">
@@ -44,9 +51,19 @@ const Index = (props) => {
     )
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+    const slug = context.params.slug;
     const client = prismic.client("https://social-links-tiago.prismic.io/api/v2")
-    const data = await client.getSingle("tiago_links")
+    const data = await client.getSingle(`${slug}_links`)
+
+    if (!data) {
+        return {
+            props: {
+                prismic: null
+            }
+        }
+    }
+
     return {
         props: {
             prismic: data.data
